@@ -1,35 +1,18 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>LIFF Demo</title>
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-</head>
-<body>
-  <button id="send">Send Flex</button>
-  <script>
-    async function main() {
-      await liff.init({ liffId: "2006439463-QMl32GYj" });
-      document.getElementById("send").addEventListener("click", () => {
-        liff.sendMessages([
-          {
-            type: "flex",
-            altText: "Flex message",
-            contents: {
-              type: "bubble",
-              body: {
-                type: "box",
-                layout: "vertical",
-                contents: [
-                  { type: "text", text: "Hello from LIFF" }
-                ]
-              }
-            }
-          }
-        ]);
-      });
-    }
-    main();
-  </script>
-</body>
-</html>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script>
+  async function main() {
+    await liff.init({ liffId: "2006439463-QMl32GYj" });
+    if (!liff.isLoggedIn()) liff.login();
+
+    await liff.sendMessages([
+      {
+        type: "text",
+        text: "おはようお兄ちゃん"
+      }
+    ]);
+
+    alert("送信完了");
+    liff.closeWindow();
+  }
+  main();
+</script>
