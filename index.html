@@ -1,41 +1,218 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <title>LIFFプロフィール取得</title>
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-</head>
-<body>
-  <h2>プロフィール情報</h2>
-  <pre id="result">読み込み中...</pre>
+  `html
+  <!DOCTYPE html>
+  <html lang="ja">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>定型文送信アプリ</title>
+      <style>
+          body { font-family: sans-serif; padding: 1em; text-align: center; }
+          h1 { color: #333; }
+          .button {
+              display: inline-block;
+              padding: 15px 30px;
+              font-size: 18px;
+              font-weight: bold;
+              color: white;
+              background-color: #00B900;
+              border: none;
+              border-radius: 8px;
+              cursor: pointer;
+              margin: 10px;
+              transition: background-color 0.3s;
+          }
+          .button:hover {
+              background-color: #009a00;
+          }
+          .button:disabled {
+              background-color: #ccc;
+              cursor: not-allowed;
+          }
+          #status { margin-top: 20px; color: #666; }
+      </style>
+  </head>
+  <body>
 
-  <script>
-    async function main() {
-      try {
-        await liff.init({ liffId: "2006439463-QMl32GYj" });
-        if (!liff.isLoggedIn()) {
-          liff.login();
-          return;
-        }
+      <h1>定型文送信アプリ</h1>
+      <p>下のボタンを押すと、自己紹介メッセージを送信します。</p>
 
-        const profile = await liff.getProfile();
-        const result = {
-          userId: profile.userId,
-          displayName: profile.displayName,
-          pictureUrl: profile.pictureUrl,
-          statusMessage: profile.statusMessage
-        };
+      <button id="sendButton" class="button" disabled>自己紹介を送信</button>
 
-        document.getElementById("result").textContent =
-          JSON.stringify(result, null, 2);
+      <p id="status">LIFFを初期化しています...</p>
 
-      } catch (e) {
-        document.getElementById("result").textContent =
-          "エラーが発生しました:\n" + e.message;
-      }
-    }
+      <!-- LIFF SDK -->
+      <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+      <script>
+          // --- ここからJavaScript ---
 
-    main();
-  </script>
-</body>
-</html>
+          // 1. LIFFの初期化
+          async function initializeLiff() {
+              const statusElement = document.getElementById('status');
+              const sendButton = document.getElementById('sendButton');
+
+              try {
+                  // ご自身のLIFF IDに置き換えてください
+                  await liff.init({ liffId: "2006439463-QMl32GYj" });
+
+                  if (!liff.isLoggedIn()) {
+                      statusElement.textContent = 'LINEにログインしてください。';
+                      liff.login(); // ログインしていなければ、ログイン画面にリダイレクト
+                  } else {
+                      statusElement.textContent = '準備完了！';
+                      sendButton.disabled = false; // 準備ができたらボタンを有効化
+                  }
+              } catch (e) {
+                  statusElement.textContent = LIFFの初期化に失敗しました: ${e};
+              }
+          }
+
+          // 2. メッセージを送信する関数
+          async function sendFlexMessage() {
+              const statusElement = document.getElementById('status');
+              if (!liff.isInClient()) {
+                  statusElement.textContent = 'この機能はLINEアプリ内で実行してください。';
+                  return;
+              }
+
+              // 送信するFlex MessageのJSONデータ
+              const flexMessage = {
+                  "type": "flex",
+                  "altText": "自己紹介が送信されました",
+                  "contents": {
+                      "type": "bubble",
+                      "hero": {
+                          "type": "image",
+                          "url": "https://via.placeholder.com/800x400.png/00B900/FFFFFF?text=My+Profile",
+                          "size": "full",
+                          "aspectRatio": "20:13",
+                          "aspectMode": "cover"
+                      },
+                      "body": {
+                          "type": "box",
+                          "layout": "vertical",
+                          "contents": [
+                              {
+                                  "type": "text",
+                                  "text": "自己紹介",
+                                  "weight": "bold",
+                                  "size": "xl"
+                              },
+                              {
+                                  "type": "box",
+                                  "layout": "vertical",
+                                  "margin": "lg",
+                                  "spacing": "sm",
+                                  "contents": [
+                                      {
+                                          "type": "box",
+                                          "layout": "baseline",
+                                          "spacing": "sm",
+                                          "contents": [
+                                              {
+                                                  "type": "text",
+                                                  "text": "名前",
+                                                  "color": "#aaaaaa",
+                                                  "size": "sm",
+                                                  "flex": 1
+                                              },
+                                              {
+                                                  "type": "text",
+                                                  "text": "（ここに名前）",
+                                                  "wrap": true,
+                                                  "color": "#666666",
+                                                  "size": "sm",
+                                                  "flex": 3
+                                              }
+                                          ]
+                                      },
+                                      {
+                                          "type": "box",
+                                          "layout": "baseline",
+                                          "spacing": "sm",
+                                          "contents": [
+                                              {
+                                                  "type": "text",
+                                                  "text": "趣味",
+                                                  "color": "#aaaaaa",
+                                                  "size": "sm",
+                                                  "flex": 1
+                                              },
+                                              {
+                                                  "type": "text",
+                                                  "text": "（ここに趣味）",
+                                                  "wrap": true,
+                                                  "color": "#666666",
+                                                  "size": "sm",
+                                                  "flex": 3
+                                              }
+                                          ]
+                                      },
+                                      {
+                                          "type": "box",
+                                          "layout": "baseline",
+                                          "spacing": "sm",
+                                          "contents": [
+                                              {
+                                                  "type": "text",
+                                                  "text": "一言",
+                                                  "color": "#aaaaaa",
+                                                  "size": "sm",
+                                                  "flex": 1
+                                              },
+                                              {
+                                                  "type": "text",
+                                                  "text": "（ここに一言メッセージ）",
+                                                  "wrap": true,
+                                                  "color": "#666666",
+                                                  "size": "sm",
+                                                  "flex": 3
+                                              }
+                                          ]
+                                      }
+                                  ]
+                              }
+                          ]
+                      },
+                      "footer": {
+                          "type": "box",
+                          "layout": "vertical",
+                          "spacing": "sm",
+                          "contents": [
+                              {
+                                  "type": "button",
+                                  "style": "link",
+                                  "height": "sm",
+                                  "action": {
+                                      "type": "uri",
+                                      "label": "詳しく見る",
+                                      "uri": "https://line.me" // 遷移先のURL
+                                  }
+                              }
+                          ],
+                          "flex": 0
+                      }
+                  }
+              };
+
+              try {
+                  // メッセージを送信
+                  await liff.sendMessages([flexMessage]);
+                  // 送信が成功したらLIFFアプリを閉じる
+                  liff.closeWindow();
+              } catch (error) {
+                  statusElement.textContent = メッセージの送信に失敗しました: ${error};
+              }
+          }
+
+          // 3. イベントリスナーの設定
+          document.addEventListener('DOMContentLoaded', () => {
+              initializeLiff();
+              const sendButton = document.getElementById('sendButton');
+              sendButton.addEventListener('click', sendFlexMessage);
+          });
+
+          // --- ここまでJavaScript ---
+      </script>
+  </body>
+  </html>
+  `
