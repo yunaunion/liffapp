@@ -1,18 +1,41 @@
-<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<script>
-  async function main() {
-    await liff.init({ liffId: "2006439463-QMl32GYj" });
-    if (!liff.isLoggedIn()) liff.login();
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>LIFFプロフィール取得</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+<body>
+  <h2>プロフィール情報</h2>
+  <pre id="result">読み込み中...</pre>
 
-    await liff.sendMessages([
-      {
-        type: "text",
-        text: "おはようお兄ちゃん"
+  <script>
+    async function main() {
+      try {
+        await liff.init({ liffId: "2006439463-QMl32GYj" });
+        if (!liff.isLoggedIn()) {
+          liff.login();
+          return;
+        }
+
+        const profile = await liff.getProfile();
+        const result = {
+          userId: profile.userId,
+          displayName: profile.displayName,
+          pictureUrl: profile.pictureUrl,
+          statusMessage: profile.statusMessage
+        };
+
+        document.getElementById("result").textContent =
+          JSON.stringify(result, null, 2);
+
+      } catch (e) {
+        document.getElementById("result").textContent =
+          "エラーが発生しました:\n" + e.message;
       }
-    ]);
+    }
 
-    alert("送信完了");
-    liff.closeWindow();
-  }
-  main();
-</script>
+    main();
+  </script>
+</body>
+</html>
